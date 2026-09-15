@@ -1,8 +1,10 @@
 const express = require("express");
 const nodemailer = require("nodemailer");
 const cors = require("cors");
+require("dotenv").config();
 
 const app = express();
+
 app.use(cors());
 app.use(express.json());
 
@@ -19,9 +21,7 @@ app.post("/api/enquiry", async (req, res) => {
       phone,
       company,
       message,
-      SMTP_USER,
-      SMTP_PASS,
-      toEmail,
+      id
     } = req.body;
 
     // Validation
@@ -32,9 +32,23 @@ app.post("/api/enquiry", async (req, res) => {
       });
     }
 
+    const smtpConfig = {
+      1: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+        to: process.env.TO_EMAIL,
+      },
+     
+    };
+
+    const config = smtpConfig[id];
+
+    console.log("Using SMTP config:", config,id);
+
+
     const mailOptions = {
-      from: SMTP_USER,
-      to: toEmail,
+      from: config.user,
+      to: config.to,
 
       // When you click Reply in Gmail,
       // reply will go to the customer
@@ -107,8 +121,8 @@ app.post("/api/enquiry", async (req, res) => {
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
-        user: SMTP_USER,
-        pass: SMTP_PASS,
+        user: config.user,
+        pass: config.pass,
       },
     });
 
